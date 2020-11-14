@@ -216,8 +216,8 @@
 
   * Guassian Mixture vs Bayesian Guassian Mixture
 
-  ![image info](./pictures/gm.png)
-  ![image info](./pictures/bgm.png)
+  ![image info](../pictures/gm.png)
+  ![image info](../pictures/bgm.png)
 
 * **Other anomaly detection and novelty detection algos**
   

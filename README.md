@@ -2,17 +2,25 @@
 
 This repository contains notes from the book "Hands on machine learning with scikit-learn, keras, and tensorflow"
 
+**Classification**
+
+[Classification](./chapters/classification.md)
+
+**SVM**
+
+[SVM](./chapters/svm.md)
+
 **Tree and Ensemble**
 
-[Dicision trees](./tree.md)
+[Dicision trees](./chapters/tree.md)
 
-[Ensemble learning](./ensemble.md)
+[Ensemble learning](./chapters/ensemble.md)
 
 **Unsupervised learning**
 
-[Dimensionality reduction](./dimension_reduction.md)
+[Dimensionality reduction](./chapters/dimension_reduction.md)
 
-[Unsupervised learning](./unsupervised.md)
+[Unsupervised learning](./chapters/unsupervised.md)
 
 
 **To Do**
