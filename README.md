@@ -6,6 +6,10 @@ This repository contains notes from the book "Hands on machine learning with sci
 
 [Classification](./chapters/classification.md)
 
+**Training models**
+
+[Training](./chapters/training.md)
+
 **SVM**
 
 [SVM](./chapters/svm.md)
