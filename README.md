@@ -6,6 +6,10 @@ This repository contains notes from the book "Hands on machine learning with sci
 
 [Landscape](./chapters/landscape.md)
 
+**End to end project**
+
+[End to end project](./chapters/end-to-end.md)
+
 **Classification**
 
 [Classification](./chapters/classification.md)
