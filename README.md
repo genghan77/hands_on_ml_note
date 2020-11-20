@@ -2,6 +2,10 @@
 
 This repository contains notes from the book "Hands on machine learning with scikit-learn, keras, and tensorflow"
 
+**Landscape**
+
+[Landscape](./chapters/landscape.md)
+
 **Classification**
 
 [Classification](./chapters/classification.md)
