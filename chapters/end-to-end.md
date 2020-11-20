@@ -260,15 +260,73 @@ df_labels = strat_train_set["median_house_value"].copy()
 
   With few exceptions, ml algos don't performwell when the input numerical attributes have very different scales. Scaling the target values is generally not required. 
 
-  * Min-max scaling
+  * Min-max scaling (normalization)
 
-    
+    sklearn provides a transformer called MinMaxScaler. It has a feature_range hyperparameter that lets you change the range if you don;t want 0-1 for some reason.  
 
   * Standardization
 
+    Unlike min-scaling, it does not bound values to a specific range, which may be a problem for some algo (nn often expect an input value ranging form 0 to 1). However, ti is much less affected by outliers. sklearn provides a transformer called StandardScaler for standardization.
+
+* Transformation pipelines
+
+  ```python
+  num_pipeline = Pipeline([
+      ("imputer", SimpleImputer(strategy="median")),
+      ("attribs_adder", CombinedAttributesAdder()),
+      ("std_scaler", StandardScaler())
+  ])
+  housing_num_tr = num_pipeline.fit_transform(housing_num)
+  # The pipeline constructor takes a list of name/estimator pairs defining a sequence of steps. All but the last estimator must be transformers (must have a fit_transform()method. ) The name can be anything as long as they are unique and don't contain double underscores "__"
+
+  # The pipeline exploses the same methods as the final estimator. 
+  ```
+
+  How about combining the process of both cat and num features steps together ? 
+
+  ```python
+  num_attribs = list(housing_num)
+  cat_attribs = ["ocean_proximity"]
+
+  full_pipeline = ColumnTransformer([
+      ("num", num_pipeline, num_attribs), # tuple containing name, transformer, and a list of names of columns 
+      ("cat", OneHotEncoder(), cat_attribs)
+  ]) # it applies each transformer to the appropriate columsn and concatenates the outputs along the second axis (the transformers must return the same number of rows). 
+
+  # in the above case the OneHotEncoder returns a sparse matrix, while the num_pipeline retursn a dense matrix. When there is such a mix of sparse and dense matrix, the ColumnTransformer estimates the density of the final matrix (the ratio of non-zero cells) and it returns a sparse matrix if the density is lower than a given threshold (by default sparse_threshold=0.3)
+
+
+  housing_prepared = full_pipeline.fit_transform(housing)
+  ```
+
+  Instead of a trnasformer, you can specify the string "drop" if you want the columsn to be dropped, or specify "pass through" if you want the columns to be left untouched. By default the columsn that were not in the list wuld be dropped, but you can set the remainder hyperparameter to any trnasformer (or to "passthrough") if you want these columsn to be handled differently. 
+
+
 **Select a model and train it**
 
+* Training and evaluating on the training set
+
+  ```python
+  from sklearn.model_selection import cross_val_score
+  scores = cross_val_score(tree_reg, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+  tree_rmse_score = np.sqrt(-scores)
+
+  
+  ```
+
+Try out many other models from various categories without spending too much time tweaking the hyperparameters first to shortlist a few (2-5) promising models.
+
+Save every model you experiment with, both hyperparameters and trained parameters, as well as the cross-validation socres and perhaps the actual prediction. You can do so with pickle or sklearn.externals.joblib, which is more efficient at serializing large NumPy array:
+
+```python
+from sklearn.externals import joblib
+joblib.dump(my_model, "my_model.pkl")
+my_model_loaded = joblib.load("my_model.pkl")
+```
+
 **Fine-tune the model**
+
+
 
 **Present your solution**
 
