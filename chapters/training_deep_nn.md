@@ -97,4 +97,28 @@ With sigmoid activation function and random initialization using a normal distri
 
 * Batch normalization
 
+  $$
+  \mu_B=\frac{1}{m_B}\sum^{m_B}_{i=1}x^i 
+  $$
+    $\mu_B$ is the vector of input means, evaluated over teh whole mini-batch B (contains one mean per input)
+  $$
+  \sigma_B^2 = \frac{1}{m_B} \sum^{m_B}_{i=1}(x^i-\mu_B)^2
+  $$
+    $\sigma_B$ is the vecotr of input standard deviation evaluated over the whole mini-batch B (contains one std per input).
+  $$
+  \hat{x^i} = \frac{x^i-\mu_B}{\sqrt{\sigma_B^2+\epsilon}}
+  $$
+    $\hat{x^i}$ is the vector of zero-centered and normalized inputs for instance i.
+
+  $$
+  z^i = \gamma \otimes \hat{x^i} + \beta
+  $$
+    $\gamma$ is the output scale parameter vector fot he layer (contains one scale paremeter per input).
+
+    $\otimes$ represents element-wise multiplication (each input is multiplied by its corresponding output scale parameter)
   
+    $\beta$ is the output shift parameter vector for the layer (contains one offset parameter per input)
+
+    $\epsilon$ is a tiny number to avoid division by zero. Typically $10^{-5}$, called *smoothing term*
+
+    $z^i$ is the output of the BN operation, it is a rescaled and shfited version of the inputs. 
