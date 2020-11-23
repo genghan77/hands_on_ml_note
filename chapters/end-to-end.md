@@ -326,8 +326,74 @@ my_model_loaded = joblib.load("my_model.pkl")
 
 **Fine-tune the model**
 
+* Grid search
 
+  ```python
+  params_grid = [
+      {"n_estimators":[3, 10, 30], "max_features": [2,4,6,8]},
+      {"bootstrap":[False], "n_estimators":[3, 10], "max_features":[2,3,4]}
+  ]  
+  forest_reg = RandomForestRegressor()
+
+  grid_search = GridSearchCV(
+      forest_reg, param_grid, cv=5,
+      scoring="neg_mean_squared_error",
+      return_train_score=True
+  )
+  # The above param_grid defined for 18 combination
+
+  grid_search.best_params_
+  grid_search.best_estimator_
+
+  # if GridSearchCV is initialized with refit = True, which is default, then once it finds the best estimator using cross-validation, it retrains it on the whole training set. 
+
+  cvres = grid_search.cv_results_
+  ```
+* Randomized search
+
+  Grid search approach is fine when you are exploring relatively few combination, but when the hyperparameters search space is large, it is often preferable to use RandomizedSearchCV instead. 
+
+* Ensemble methods
+
+* Analyze the best models and their errors
+
+  You will often gain good insights on the problem by inspecting the best models. 
+  
+  ```python
+  feature_importnaces = grid_search.best_estimator_.feature_importances_
+  ```
+
+  With the feature importance, you may want to try dropping some of the less useful features. 
+
+* Evaluate your system on the test set
+  
+  * Apply the same pipeline to test set and perform evaluation
+
+  * In some cases, such a point estimate of the generalization error will not be quite enough to convice you. You might watn to have an idea of how precise this esimtae is. You can ompute a 95% confidence interval using scipy.stats.t.inverval()
+
+  ```python
+  from scipy import stats
+  confidence = 0.95
+  square_errors = (final_predictions - y_test)**2
+  np.sqrt(stats.t.interval(confidence, 
+                           len(squared_error) - 1,
+                           loc = squred_errors.mean(),
+                           scale=stats.sem(squared_errors)))
+  ```  
 
 **Present your solution**
 
+* What have you leanrt about the data
+* What worked and what did not
+* what assumption were made
+* your systems' limitation
+
 **Launch, monitor, and maintain your system**
+
+* Write monitoring code to check your systems' live performance at regular intervals and trigger alerts when ti drops  (Not only catch suden breakge, but also performance degradation.)
+
+* Evaluating your system's performance will require sampling the system's prediction and evaluting them. This generally require a human anaysis. 
+
+* You should also make sure you evaluate the system's input data quality. This is particularly important for online learning system. 
+
+* Train your models on a regular basis using fresh data. You should automate this process as much as possible. If your system is an online learning system, make sure snapshots of its state are saved at regular intervals so you can easily roll back to a previously working state.

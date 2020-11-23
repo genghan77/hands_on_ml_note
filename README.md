@@ -10,6 +10,7 @@ This repository contains notes from the book "Hands on machine learning with sci
 
 [End to end project](./chapters/end-to-end.md)
 
+
 **Classification**
 
 [Classification](./chapters/classification.md)
@@ -34,6 +35,13 @@ This repository contains notes from the book "Hands on machine learning with sci
 
 [Unsupervised learning](./chapters/unsupervised.md)
 
+**Into to ANN with Keras**
+
+[Intro to ANN with keras](./chapters/intro_to_ann.md)
+
+**Training deep neural net**
+
+[Training deep neural net](./chapters/training_deep_nn.md)
 
 **To Do**
 
