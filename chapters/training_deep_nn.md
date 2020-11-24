@@ -7,11 +7,13 @@ With sigmoid activation function and random initialization using a normal distri
 * Glorot and He initialization
 
   Normal distribution with mean 0 and variance
+
   $$
-   \sigma^2 = \frac{1}{fan_{avg}}
+  \sigma^2 = \frac{1}{fan_{avg}}
   $$
 
   or a uniform distribution between $-r$ and $+r$ where
+
   $$
   r = \sqrt{\frac{3}{fan_{avg}}}
   $$
@@ -100,7 +102,9 @@ With sigmoid activation function and random initialization using a normal distri
   $$
   \mu_B=\frac{1}{m_B}\sum^{m_B}_{i=1}x^i 
   $$
+
     $\mu_B$ is the vector of input means, evaluated over teh whole mini-batch B (contains one mean per input)
+    
   $$
   \sigma_B^2 = \frac{1}{m_B} \sum^{m_B}_{i=1}(x^i-\mu_B)^2
   $$
@@ -122,3 +126,70 @@ With sigmoid activation function and random initialization using a normal distri
     $\epsilon$ is a tiny number to avoid division by zero. Typically $10^{-5}$, called *smoothing term*
 
     $z^i$ is the output of the BN operation, it is a rescaled and shfited version of the inputs. 
+
+  Four parameters were learnt during the training process. $\gamma$ (the output scale vector), and $\beta$ (the output offset vector), and $\mu$ and $\sigma$. Note that $\gamma$ and $\beta$ are learnt thru backpropagation, and $\mu$ and $\sigma$ are estimated using an exponential moving average. And $\mu$ and $\sigma$ are estimated during training but used after training. 
+
+  There is a run time penalty for using BN. So if you need predictions to be lightning-fast, you may want to check how well plain ELU + He initialization perform before applying BN.
+
+  ```python
+  # Add BN after each hidden layer's activation, and optinally add a BN layer as well as the first layer in your model so that you odn't ahve to standardize the input.
+
+  model = keras.models.Sequential([
+    keras.layers.Flatten(input_shape=[28, 28]),
+    keras.layers.Batchnormalization(),
+    keras.layers.Dense(300, activation="elu", kernel_initializer="he_normal"),
+    keras.layers.Batchnormalization(),
+    keras.layers.Dense(300, activation="elu", kernel_initializer="he_normal"),
+    keras.layers.Batchnormalization(),
+    keras.layers.Dense(10, activation="softmax")
+  ])
+  
+  [(var.name, var.trainable) for var in model.layers[1].variables]
+  model.layers[1].updates
+
+  # The BN can also be add before activation. And since BN includes a offset parameter per input, you can remove the bias term from previous layer by setting use_bias=False. There are debates on whether BN should be before or after activation, but it depends on the dataset. 
+  
+  model = keras.models.Sequential([
+    keras.layers.Flatten(input_shape=[28, 28]),
+    keras.layers.BatchNormalization(),
+    keras.layers.Dense(300, kernel_initializer="he_normal", use_bias=False)
+    keras.layers.BatchNormalization(),
+    keras.layers.Activation("elu"),
+    keras.layers.Dense(300, kernel_initializer="he_normal", use_bias=False)
+    keras.layers.BatchNormalization(),
+    keras.layers.Activation("elu"),
+    keras.layers.Dense(10, activation="softmax")
+  ])
+  ```
+
+  * Hyperparameters for BN
+
+    * momentum
+      
+      It is used when updating the exponential moving averages. Given a new value $v$, the running average $\hat{v}$ is updated using the following equation:
+
+      $$
+      \hat{v} \leftarrow \hat{v} \times \text{ momentum} + v \times (1-\text{momentum})
+      $$
+
+      A good momentum value is typically clsoe to 1 --- for exmaple, 0.9, 0.99, 0.999 (you want more 9s for large datasets and smaller mini-batches).
+
+    * axis
+      
+      It determines which axis should be normalized. It defaults to -1, meaning that by default it will normalize the last axis. 
+
+* Gradient clipping
+
+  Since BN is tricky to use in RNN, gradient clipping is often used. In keras, implementing Gradient Clipping is just a matter of setting the clipvalue or clipnorm argument when creating an optimizer. 
+
+  ```python
+
+  optimizer = keras.optimizers.SGD(clipvalue=1.0)
+  model.compile(loss="mse", topimizer=optimizer)
+  # The above code snippet clip every component of the gradient vector to a value between -1 to 1. This may change the orientation of the gradeint vector. In practice, this approach works well. Anthoer way is to use clipnorm. This will clip the whole gradient if its $l_2$ norm is greater than the threshold you picked, and reserving tis orientation. 
+  ```
+
+  If you observe gradients explode during training (you can track the size of the gradeints using TensorBoard), you may try both clipping by value and norm, with different threshold. 
+
+**Reusing pretrained layers**
+
