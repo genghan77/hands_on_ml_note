@@ -43,6 +43,10 @@ This repository contains notes from the book "Hands on machine learning with sci
 
 [Training deep neural net](./chapters/training_deep_nn.md)
 
+**Custom model and training with Tensorflow**
+
+[Customization](./chapters/customization.md)
+
 **To Do**
 
 * Sklearn documentation notes
