@@ -506,3 +506,102 @@ When you save a model, the optimizer and its learning rate get saved along with 
 * If you need a low-latency model, you need less layers, avoid BN, and possibly replace SELu with leaky ReLU. having a sparse model might help. You may also try to reduce the float precision from 32-bits to 16-bits.
 
 * If you are building a risk-senstive application, or inference latency is not important, you can sue MC Dropout to boost performance and get more reliable probability estimates along with uncertainty estimates. 
+
+
+**Notes from [Andrej Karpathy blog](http://karpathy.github.io/2019/04/25/recipe/)**
+
+* The recipe 
+
+  Build from simple to complex and at every step of the way, try to make concrete hypotheses about what will happend and then either validate them with an experiment or investigate until we find some issue. 
+
+  * Become one with the data
+
+    * Begin by thoroughly inspecting the data. 
+
+      Scanning through examples, understanding their distribution, and looking for patterns. Look for data imbalances and biases. Pay attention to own process for classifying the data, which hints at the kinds of architectures we'll eventually explore. 
+
+      Example: are very local features enough or do we need global context? How much variation is there and what form does it take? What variation is spurious and could be preprocessed out ? Does spatial position matter or do we want to average pool it out? How much does detail matter and how far could we afford to downsample the images ? How noisy are the labels ?
+
+    * Look at your network (mis)predictions and understand where they might be coming from. If your network is giving you some prediction that doesn't seem consistent with what you have seen in the data, something is off.
+
+    * Write simple code to search/filter/sort by whatever you can think of  (type of label, size of annotations, number of annotations, etc.) and visualize their distributions and the outliers along any axis. The outliers espcially almost always uncover some bugs in data quality or preprocessing. 
+
+  * Set up the end-to-end training/evaluation skeleton + get dumb baselines.
+    
+    * Setup a full training+evaluation skeleton and gain trust in its correctness via experiments. Pick some simple model that you couldn't possibly have screwed up somehow - e.g. a linear classifier, or a very tiny ConvNet. Train it, visualize the losses, and any other metric, model predictions and perform a series of ablation experiment with explicit hypotheses along the way. 
+
+    * Tips 
+      * Fix random seed
+      * Simplify. Disable any unnecessary fanciness. For example, turn off any data augmentation at this stage. 
+
+      * add significant digits to your eval When plotting the test loss run the evaluation over the entire test set. Do not just plot the test losses over batches and then rely on smoothing them in Tensorbaord. 
+
+      * Verify loss @ init. Verify that your loss starts at the correct loss vale. E.g. if you initialize your final layer you should meausre $-log(1/n_classes)$ on a softmax at initialization. 
+
+      * init well. E.g. if you are regression some value that have a mean of 50 then initialize the final biase to 50. If you have an imbalanced dataset of a ratio 1:10 of +:-. Set the bias on your logits such that your network predicts probability of 0.1 at initialization. 
+
+      * Human baseline. Mintor metrics other than loss that are human interpretable and checkable (e.g. accuracy)
+
+      * Input-independent baseline. Train an input-independent baseline (e.g. easiest is to just set all your inputs to zero). Find out does your model learn to extract any informationout of the input at all ?
+
+      * Overfit one batch. Overfit a single batch of only a few examples (as little as two). TO do so we increase the capacity of our model and verify that we can reach the lowest achievale loss (e.g. zero). Visualize in the same plot both the label and the prediction and ensure that they end up aligning perfectly once we reach the minimal loss. If they do not, there is a bug. 
+
+      * Verify decreasing training loss. At this stage, you will be underfitting on your dataset. Try to increase its capacity just a bit, did the training loss go down as it should ?
+
+      * Visualize just before the net. Visualize the data immediately before feeding it into nets. Visualize exacmly what goes into the network, decoding the raw tensor fo data and labels into visualiation. This is to check the problems in data preprocessing and augmentation.
+
+      * Visualize prediction dynamics. Visualize model predictions on a fixed test batch during the course of training. If it feel the network struggle to fit your data, it would wiggles too much in some way, revealing instabilityes. Too low or high learning rate are also easily noticeable in the amount of jitter.
+
+      * Use backprop to chart dependencies. To debug wehther the vectorized broadcasted oepration goes wrong, one way is to set the loss to be something trivial like the sum of all outputs of exmple i, run the backward pass all the way to the input, and ensure that you get a non-zero gradient only on the i-th input. 
+
+      * generalize a special case. Write specific function first, get it to work, then eneralize it later making sure you get the same result 
+
+  * Overfit 
+    
+    First get a model that can overfit (focus on training loss) and then regularize it appropriately (give up some training los to imrpvoe validatin loss). If we are not able to reach a low error rate with any model at all that may indicate some issues, bugs, or misconfiguration. 
+
+    * Tips
+
+      * PIcking the model. Find the most related paper and copy paste their simplest architecture that achieves good performance. DO customization at a later time. 
+
+      * Adam is safe. Using Adam with a learning rate of 3e-4. Adam is much more forgiving to hyperparmeters, including a bad leraning rate. 
+
+      * Complexify only one at a time. 
+
+      * Don't trust learning rate decay defaults. Desable learning rate decays entirely and tune this all the way at the end. 
+
+  * Regularize 
+
+    * Get more data. The other way would be ensembles (if you can afford them), but that tops out after ~5 models. 
+
+    * Data augment. Try out more aggresive data augmentation
+
+    * Creative augmentation. 
+
+    * Pretrain. 
+    * Stick with supervised learning. NLP seems to be doing pretty well with BERT, quite likely owning to the more deliberate nature of text and a higher signal to noise ratio. 
+
+    * Smaller input dimensionality. 
+    * Smaller model size. 
+    * Decrease the batch size. Dur to the normalization insdie batch norm smaller batch size correspond to stronger regularization. 
+    * Dropout. Drop out does not seem to play nicd with batch norm. 
+
+    * Weight decay. Increase the weight decay penalty. 
+
+    * early stopping. 
+    * try a larger model. 
+
+  * Tune
+
+    * Tips
+
+      * Random over grid search. 
+      * Hyperparameter optimization. Use bayesian hyperparameter optimization toolboxes. 
+
+  * Squeeze out the juice
+
+    * Ensemble. MOst ensembles are pretty much guaranteed way to gain 2% of accuracy on anything. If you cna't afford the computation at test time look into distilling your ensemble into a netowkr using dark knowledge. 
+
+    * leave it training. 
+     
+
