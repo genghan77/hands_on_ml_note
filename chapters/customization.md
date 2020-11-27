@@ -401,8 +401,68 @@ metrics = [keras.metrics.MeanAbsoluteError()]
 
 # custom loop
 for epoch in range(1, n_epochs+1):
-  print()
+  print("Epoch {}/{}".format(epoch, n_epochs))
+  for step in range(1, n_steps+1):
+    X_batch, y_batch = random_batch(X_train_scaled, y_train)
+    with tf.GradientTape() as tape:
+      y_pred = model(X_batch, training=True)
+      main_loss = tf.reduce_mean(loss_fn(y_batch, y_pred) # if you want to apply different weights to each instance, it goes here
+      loss = tf.add_n([main_loss] + model.losses) # In this model, the total loss is the sum of main loss plus the other losses (regularization loss per layer)
+      # add_n sums multiple tensors of the same shape and data type
+    gradients = tape.gradient(loss, model.trainable_variables) # ask tape to compute the gradient of the loss with regards to each trainable variable
+    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+    mean_loss(loss) # Apply the gradients to optimizer to perform a gradient dscent step
+    for metric in metrics:
+      metric(y_batch, y_pred)
+      print_status_bar(step*batch_size, len(y_train), mean_loss, metrics)
+    print_status_bar(len(y_train), len(y_train), mean_loss, metrics)
+    for metric in [mean_loss] + metrics:
+      metric.reset_states()
+
+# If you set the optimizer's clipnorm or clipvvalue , it will take care of this. If you want to apply any transformation to the gradients, simply do so before calling apply_gradients()
+
+# If you add weight constraints to yout model (by setting kernel_constraint or bias_constraint when creating a layer), you should update the training loop to apply these contraints just after apply_gradients():
+for variable in model.variables:
+  if variable.constraint is not None:
+   variable.assign(variable.constraint(variable))
 ```
 
 
 **Tensorflow functions and graphs**
+
+```python
+# two ways to turn a python function into a tensorflow function for boosting performance 
+
+def cube(x):
+  return x**3
+tf_cube = tf.function(cube)
+
+@tf.function
+def tf_cube(x):
+  return x**3
+tf_cube.python_function(2)
+```
+When you write a custom loss function, a custom metric, a custom layer or any other custom function, and use it in Keras, then Keras will converts the python function into TF function automaticallly. If you don't want to convert the function to TF, you can stop this by setting dynamic=True when creating a custom layer or custom model. Alternatively, you can set run_eagerly=True when calling the model's compile() method. 
+
+TF function generates a new graph for every unique set of input shpaes and data types, and it caches it for subsequent calls. For tensors, it will generate graph and reuse it for the same shape and data type tensor. However, if numeric python values are passed, a new graph will be generated for every distinct value. So python value should be reserved for arguments that will have very few unique values. This allows TensorFlow to better optimize each variant of the model.
+
+* Autograph and tracing 
+
+  * First step TensorFlow analyze Python function's source code to capture all the control flow. This step is called autograph. After analyzing, autograph outputs an upgraded version of the function in which all the control flow statements are replaced by the appropriate TensorFlow operation. 
+  
+  * next, TensorFlow calls this "upgraded" function and passing a symbolic tensor, only a name, a data type, and shape with no actual value. The function will run in graph mode. 
+  
+  To view the generated function's source code, you can call tf.autograph.to_code(sum_squares.python_function). The code is not meant to be pretty, but it can be helpful for debugging. 
+
+* TF Function rules
+
+  Most of the time, you can just decorate the function with @tf.function to convert a Pyhotn function into TF function. 
+
+  * If you call external library, this call will run only during tracing. It will not be part of the graph. A tf graph can only include TensorFlow constructs. 
+  * Make sure you use tf.reduce_sum() instead of np.sum()
+  * Use tf.sort() instead of sorted()
+
+  * Use tf.random.uniform([]) instead of np.random.rand()
+  * If the non-tf code has side effects, like logging or updating a Python counter, it will only occur when the function si traced. 
+  * use for i in tf.range(10) instead of for i in range(10) 
+    
