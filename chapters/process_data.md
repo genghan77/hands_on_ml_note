@@ -49,11 +49,15 @@ The  whole Data API revolves aroundt he concept of a *dataset*.
   n_inputs = 8
 
   def preprocess(line):
-    defs = [0.] * n_inputs + [tf.constant([], dtype=tf.float32)]
-    fields = tf.io.decode_csv(line, record_defaults=defs)
+    defs = [0.] * n_inputs + [tf.constant([], dtype=tf.float32)] # missing value in feature columns are default to 0 and they are floats. Target is floats, and there is no default value, if it encoutners a missing value it would raise an exception. 
+    fields = tf.io.decode_csv(line, record_defaults=defs) # line is the line to parse, the second is an array containing the default value for each column in the csv file. This returns a list of sclaer tensors (one per column)
     x = tf.stack(fields[:-1])
     y = tf.stack(fields[-1:])
     return (x-X_mean)/X_std, y
   ```
-    
+  * Prefetching 
+
+    By calling prefetch(1) at the end, we are creating a dataset that will do its best to always be one batch ahead.  
   
+**TFRecord Format**
+
