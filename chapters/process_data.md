@@ -61,3 +61,6 @@ The  whole Data API revolves aroundt he concept of a *dataset*.
   
 **TFRecord Format**
 
+TFRecord format is TF prefer format for handling large amounts of data. 
+
+
