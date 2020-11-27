@@ -47,6 +47,9 @@ This repository contains notes from the book "Hands on machine learning with sci
 
 [Customization](./chapters/customization.md)
 
+**Loading and preprocessing data with TensorFlow**
+[Data processing](./chapters/process_data.md)
+
 **To Do**
 
 * Sklearn documentation notes
