@@ -365,3 +365,44 @@ You must implement call() for losses, layers, activation functions and models, o
       return grad/ (1+1/exp)
     return tf.math.log(exp+1), my_softplus_gradients
   ```
+
+* Custom training loops
+
+  Unless you really need the extra flexibility, you should prefer using the fit() method rather than implementing your own training loop. 
+
+```python
+
+# model 
+l2_reg = keras.regularizers.l2(0.05)
+model = keras.models.Sequential([
+    keras.layers.Dense(30, activation="elu", kernel_initializer="he_normal",kernel_regularizer=l2_reg)
+    keras.layers.Dense(1, kernel_regularizer=l2_reg)
+])
+
+# utility function
+def random_batch(X, y, batch_size=32):
+  idx = np.random.randint(len(X), size=batch_size)
+  return X[idx], y[idx]
+
+def print_status_bar(iteration, total, loss, metrics=None):
+  metrics = " - ".join(["{}:{:.4f}".format(m.name, m.result())
+                        for m in [loss] + (metrics or [])])
+  end = "" if iteration < total else "\n"
+  print("\r{}/{} - ".format(iteration, total)+metrics, end=end)
+
+# define hyperparameter
+n_epochs = 5
+batch_size = 32
+n_steps = len(X_train) // batch_size
+optimizer = keras.optimizers.Nadam(lr=0.01)
+loss_fn = keras.losses.mean_squqred_error 
+mean_loss = keras.metrics.Mean()
+metrics = [keras.metrics.MeanAbsoluteError()]
+
+# custom loop
+for epoch in range(1, n_epochs+1):
+  print()
+```
+
+
+**Tensorflow functions and graphs**
