@@ -63,4 +63,17 @@ The  whole Data API revolves aroundt he concept of a *dataset*.
 
 TFRecord format is TF prefer format for handling large amounts of data. 
 
+**Preprocessing the input feautres**
+
+* You can either encode categorical features using one-hot or embedding. As a rule of thumb, if the number of categories is lower than 10, then one-hot is generally the way to go. If it is greater than 50, then embedding are preferable. In betwee, you may want to experiment and see which one works best. 
+  
+* For encoding categoical features using embedding, as a rule of thumb, embeddings typically have 10 to 300 dimensions, depending on the task and the vocab size you have. 
+
+* Keras preprocessing layers
+
+  * One example would be Discretization layer. It is not differentiable, and it should only be used at the start of your model. You should not use an Embedding layer directly in a custom preprocessing layer, if you want it to be trainable. Because the model's preprocessing layers will be forezen during taning. In this case, if you want it to be trainable, you need to add it separately to the model. 
+
+  * If the standard preprocessing layers are insifficient, you have the options to create your own preprocessing layer. Create a subclass of the keras.layers.PreprocessingLayer class with an adapt() method, which should take a data_sample argument and optionally an extra reset_state argument. 
+
+**TF Transform**
 

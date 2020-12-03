@@ -50,6 +50,10 @@ This repository contains notes from the book "Hands on machine learning with sci
 **Loading and preprocessing data with TensorFlow**
 [Data processing](./chapters/process_data.md)
 
+**CNN technique**
+
+[CNN technique](./chapters/cnn.md)
+
 **To Do**
 
 * Sklearn documentation notes
