@@ -52,7 +52,7 @@ This repository contains notes from the book "Hands on machine learning with sci
 
 **CNN technique**
 
-[CNN technique](./chapters/cnn.md)
+[Computer vision](./chapters/cv.md)
 
 **To Do**
 
