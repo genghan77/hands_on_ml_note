@@ -48,6 +48,7 @@ This repository contains notes from the book "Hands on machine learning with sci
 [Customization](./chapters/customization.md)
 
 **Loading and preprocessing data with TensorFlow**
+
 [Data processing](./chapters/process_data.md)
 
 **CNN technique**
@@ -55,10 +56,14 @@ This repository contains notes from the book "Hands on machine learning with sci
 [Computer vision](./chapters/cv.md)
 
 **Sequence processing**
+
 [Processing sequences using RNN and CNN](./chapters/sequence.md)
 
-**To Do**
+**RNN and attention**
 
-* Sklearn documentation notes
-  
-  * classifiers that can estimate class probabilities. 
+[NLP with RNNs and Attention](./chapters/rnn.md)
+
+**Representation learning and Generative learning**
+
+[Representational learning and generative learning using Autoencoders and GAN](./chapters/gan.md)
+
