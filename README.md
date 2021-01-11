@@ -54,6 +54,9 @@ This repository contains notes from the book "Hands on machine learning with sci
 
 [CNN technique](./chapters/cnn.md)
 
+**Sequence processing**
+[Processing sequences using RNN and CNN](./chapters/sequence.md)
+
 **To Do**
 
 * Sklearn documentation notes
